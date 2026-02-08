@@ -19,7 +19,7 @@ By injecting SSL Session Keys (`SSLKEYLOGFILE`) into **Firefox/Curl**, I success
 ### Phase 1: The Negotiation (DNS & ALPN)
 Before sending any data, the browser must know if the server supports QUIC. It doesn't guess; it asks via DNS.
 
-![Full Flow Timeline](screenshots/1_full_flow.png)
+![Full Flow Timeline](screenshots/1_Full_Flow_Timeline.png)
 *Figure 1: The complete timeline showing DNS Query → DNS Response → Immediate QUIC Initial.*
 
 **Observation:**
