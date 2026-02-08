@@ -32,7 +32,7 @@ Before sending any data, the browser must know if the server supports QUIC. It d
 ### Phase 2: The "Zero-RTT" Connection (UDP)
 Traditional HTTPS requires a TCP 3-way handshake (SYN, SYN-ACK, ACK) followed by a TLS handshake. QUIC merges these.
 
-![QUIC Handshake](screenshots/3_quic_handshake.png)
+![QUIC Handshake](screenshots/3_QUIC_Initial_NoTCP.png)
 
 **Key Technical Findings:**
 * **No TCP Flags:** There are no SYN/ACK packets.
@@ -44,7 +44,7 @@ Traditional HTTPS requires a TCP 3-way handshake (SYN, SYN-ACK, ACK) followed by
 ### Phase 3: The Decryption (Breaking the Encryption)
 Without SSL keys, Wireshark sees generic `QUIC Protected Payload`. By loading the session keys, I revealed the actual HTTP/3 structure.
 
-![Decrypted GET Request](screenshots/4_decrypted_get.png)
+![Decrypted GET Request](screenshots/4_Decrypted_HTTP3_Data.png)
 *Figure 3: Decrypted Packet #319 showing the HTTP/3 GET Request.*
 
 **Proof of Success:**
