@@ -57,17 +57,4 @@ One of the biggest challenges in UDP is fragmentation. In TCP, the **MSS (Maximu
 ```bash
 env SSLKEYLOGFILE=$HOME/ssl-keys.log firefox --private-window [https://www.facebook.com](https://www.facebook.com)
 
-## 🧠 Theory: Why the Future is UDP (And Why TCP is "Dumb")
 
-### 1. The "MSS Clamping" Problem in TCP
-* **Scenario:** You send a 1500-byte packet. Your Router adds an IPsec/GRE header (overhead). Now the packet is 1560 bytes.
-* **The Crash:** The ISP's link only supports 1500. The packet drops.
-* **TCP's Flaw:** TCP relies on the router to "tell" it the size (ICMP Fragmentation Needed). If a firewall blocks ICMP, TCP keeps sending big packets, and the connection hangs (Black Hole).
-* **The Fix:** We have to manually configure "IP TCP Adjust-MSS" on Cisco routers to fool TCP into sending smaller packets.
-
-### 2. The QUIC (UDP) Solution
-* **Smart Probing:** QUIC doesn't trust the router. It sends a "Dummy" 1200-byte packet. If it passes, it tries 1280, then 1350.
-* **Self-Healing:** If a packet drops due to size, QUIC detects the loss instantly and lowers the size *without* needing ICMP messages from the router.
-* **No "Clamping" Needed:** Because QUIC handles size at the application layer, you don't need special router configs like MSS Clamping for it to work.
-
----
