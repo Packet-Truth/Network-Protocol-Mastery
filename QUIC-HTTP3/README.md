@@ -1,64 +1,58 @@
 # 🚀 Deep Dive: QUIC & HTTP/3 Protocol Analysis
-### A Wireshark Case Study on Modern Web Traffic
+**Project:** Wireshark Analysis of UDP-based Web Traffic
+**Protocol:** QUIC (Quick UDP Internet Connections)
+**Target:** Facebook.com
 
-## 📌 Project Overview
-This project demonstrates a practical analysis of the **QUIC protocol (HTTP/3)** using Wireshark. Unlike traditional TCP+TLS connections, QUIC runs over UDP and encrypts transport metadata, making analysis challenging.
+## 📖 Introduction: What is QUIC?
+QUIC (Quick UDP Internet Connections) is a modern transport layer network protocol designed to improve the performance of web applications. Unlike standard HTTP which stacks multiple protocols (HTTP over TLS over TCP), **QUIC merges Transport (UDP), Security (TLS 1.3), and Reliability into a single layer.**
 
-By injecting SSL Session Keys (`SSLKEYLOGFILE`) into **Firefox/Curl**, I successfully decrypted the traffic to visualize the full lifecycle of a QUIC connection: from the initial DNS negotiation to the decrypted HTTP/3 GET request.
-
-**Tools Used:**
-* **OS:** Arch Linux (CachyOS)
-* **Network Analyzer:** Wireshark
-* **Browser/Client:** Firefox (Private Mode) & Curl
-* **Target:** Facebook.com (Early adopter of HTTP/3)
+This case study demonstrates how QUIC bypasses the traditional "TCP Head-of-Line Blocking" issue by using UDP while maintaining the security of TLS 1.3.
 
 ---
 
-## 🔍 The "Perfect Flow" Analysis
+## 🔬 Wireshark Analysis Findings
 
-### Phase 1: The Negotiation (DNS & ALPN)
-Before sending any data, the browser must know if the server supports QUIC. It doesn't guess; it asks via DNS.
-
+### 1. The Timeline (Zero-RTT Connection)
 ![Full Flow Timeline](screenshots/1_Full_Flow_Timeline.png)
-*Figure 1: The complete timeline showing DNS Query → DNS Response → Immediate QUIC Initial.*
+* **Observation:** The capture shows a DNS query followed immediately by a QUIC packet.
+* **Significance:** There is **no TCP 3-Way Handshake**. The connection establishment latency is drastically reduced (Zero-RTT), as the handshake and encryption keys are exchanged in the very first packet.
 
-**Observation:**
-1.  **The Question:** Client sends a DNS Query for `www.facebook.com` type `HTTPS` (Type 65).
-2.  **The Answer:** The DNS server responds with a Service Parameter **`alpn="h3"`**.
-3.  **The Decision:** This tells the browser: *"Don't use TCP. Connect directly via UDP on port 443."*
+### 2. DNS Negotiation (The Permission)
+![DNS H3 Permission](screenshots/2_DNS_H3_Permission.png)
+* **Mechanism:** The browser asks via DNS (Type 65 HTTPS Record) if the server supports QUIC.
+* **Result:** The DNS server responds with `alpn="h3"`. This "Application-Layer Protocol Negotiation" confirms that the client can skip TCP and use UDP port 443 directly.
 
----
-
-### Phase 2: The "Zero-RTT" Connection (UDP)
-Traditional HTTPS requires a TCP 3-way handshake (SYN, SYN-ACK, ACK) followed by a TLS handshake. QUIC merges these.
-
+### 3. Connection & Security (Merged Layers)
 ![QUIC Handshake](screenshots/3_QUIC_Initial_NoTCP.png)
+* **The Difference:** In TCP, the "Connection" (SYN/ACK) and "Security" (TLS Hello) happen in separate round-trips.
+* **In QUIC:** The **QUIC Initial** packet contains the TLS 1.3 Client Hello.
+* **Impact:** This makes QUIC "Connection-Oriented" despite running on UDP (which is connectionless). It uses **Connection IDs (CIDs)** to track the session, allowing users to switch networks (WiFi to 5G) without breaking the download.
 
-**Key Technical Findings:**
-* **No TCP Flags:** There are no SYN/ACK packets.
-* **Protocol:** Traffic switches immediately to **QUIC (UDP)** after the DNS response.
-* **Connection ID (CID):** Unlike TCP ports, QUIC uses Connection IDs to maintain sessions even if the client's IP changes (e.g., switching from WiFi to Mobile Data).
-
----
-
-### Phase 3: The Decryption (Breaking the Encryption)
-Without SSL keys, Wireshark sees generic `QUIC Protected Payload`. By loading the session keys, I revealed the actual HTTP/3 structure.
-
-![Decrypted GET Request](screenshots/4_Decrypted_HTTP3_Data.png)
-*Figure 3: Decrypted Packet #319 showing the HTTP/3 GET Request.*
-
-**Proof of Success:**
-* **Protocol:** Displayed as `HTTP3` instead of encrypted UDP garbage.
-* **Method:** We can clearly see the **`:method: GET`** header.
-* **Path:** The browser requested `/security/hsts-pixel.gif`.
-* **Authority:** The request was sent to `facebook.com`.
+### 4. Decrypting the Payload
+![Decrypted Data](screenshots/4_Decrypted_HTTP3_Data.png)
+* **Encryption:** QUIC payloads are encrypted by default. Without the `SSLKEYLOGFILE`, Wireshark only shows "Protected Payload".
+* **Decryption:** By injecting the session keys, I revealed the HTTP/3 `GET` request. This confirms that the application layer (HTTP) is successfully running over the QUIC transport.
 
 ---
 
-## 🛠️ How to Reproduce
+## 🧠 Technical Insight: Handling MTU & MSS
+One of the biggest challenges in UDP is fragmentation. In TCP, the **MSS (Maximum Segment Size)** option in the SYN packet prevents fragmentation.
 
-If you want to replicate this analysis, follow these steps on a Linux machine:
+**How QUIC handles this (My Observation):**
+* **No MSS Option:** QUIC headers do not have an MSS field like TCP.
+* **Path MTU Discovery (PMTUD):** Instead of trusting the router to clamp the MSS, QUIC actively probes the network path.
+* **Padding:** I observed that the **QUIC Initial** packets are heavily padded (to ~1200 bytes). If this packet passes, QUIC knows the path supports this MTU. If it drops, the connection fails fast.
+* **Conclusion:** QUIC manages packet sizing at the **Application/Transport Layer**, making it independent of middlebox (router) configurations.
 
-**1. Kill existing browser instances:**
+---
+
+## 🛠️ Reproduction Steps (Linux)
+
+**Pre-requisites:**
+* **OS:** Arch Linux (CachyOS)
+* **Browser:** Firefox (Private Mode)
+* **Tools:** Wireshark with TLS Key Logging enabled.
+
+**Command Used:**
 ```bash
-pkill firefox
+env SSLKEYLOGFILE=$HOME/ssl-keys.log firefox --private-window [https://www.facebook.com](https://www.facebook.com)
