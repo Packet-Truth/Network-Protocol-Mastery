@@ -1,7 +1,7 @@
 # 🛡️ Network Protocol Mastery
 
-**Engineer:** Packet-Truth  
-**Goal:** Deep dive into TCP/IP, UDP, QUIC, and Packet Analysis.
+**Engineer:** Packet-Truth
+**Goal:** Hands-on protocol analysis from core TCP/IP to SD-WAN and cloud networking.
 
 > "Packets don't lie."
 
@@ -9,18 +9,20 @@
 
 ## 📂 Protocol Library
 
-### 1. TCP (Transmission Control Protocol)
-* ✅ [Lab 1: TCP Handshake Analysis](./TCP/README.md)
-* ⏳ Lab 2: Window Scaling (Coming Soon)
-
-### 2. QUIC & HTTP/3 (The Future of Web) 🚀
-* ✅ **[Case Study: Decrypting Facebook Traffic](./QUIC-HTTP3/README.md)**
-    * Analyzing Zero-RTT Handshakes
-    * DNS HTTPS Record & ALPN Negotiation
-    * Decrypting TLS 1.3 payloads in Wireshark
-    * *Tools: Wireshark, SSLKEYLOGFILE, Linux*
-
-### 3. UDP (User Datagram Protocol)
-* *(Labs loading...)*
+| Protocol | Labs | Status |
+|---|---|---|
+| TCP | Handshake, Retransmission, Window Scaling | In Progress |
+| UDP | DNS over UDP, Voice Traffic | In Progress |
+| DNS | Normal Resolution, Failure Impact, Split DNS | In Progress |
+| ICMP | Ping and Traceroute Analysis | In Progress |
+| NAT | NAT Traversal in IPsec | In Progress |
+| BGP | Session Setup, Route Advertisement, Path Selection | In Progress |
+| OSPF | Hello Packets, LSA Flooding, DR/BDR Election | In Progress |
+| IPsec/IKEv2 | Phase 1 IKE, Phase 2 IPsec | In Progress |
+| GRE | Encapsulation Analysis | In Progress |
+| QUIC/HTTP3 | Decrypting Facebook Traffic, Zero-RTT | Done |
 
 ---
+
+## 🔧 Tools Used
+Wireshark, tcpdump, GNS3, Fedora 43, SSLKEYLOGFILE
