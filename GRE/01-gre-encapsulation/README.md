@@ -1,3 +1,2 @@
-# 01-gre-encapsulation
-
-Work in progress — content coming soon.
+# GRE Encapsulation
+Work in progress.

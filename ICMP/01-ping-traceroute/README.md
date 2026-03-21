@@ -1,3 +1,2 @@
-# 01-ping-traceroute
-
-Work in progress — content coming soon.
+# Ping and Traceroute
+Work in progress.

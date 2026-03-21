@@ -1,3 +1,2 @@
-# 01-nat-traversal-ipsec
-
-Work in progress — content coming soon.
+# NAT Traversal in IPsec
+Work in progress.
