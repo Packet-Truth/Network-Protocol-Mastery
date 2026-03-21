@@ -1,7 +1,7 @@
 # Lab Report: TCP Handshake & Latency Analysis
 
 **Date:** Feb 03, 2026
-**Lab:** GNS3 lab / Wireshark capture
+**Lab:** Asus Zephyrus G14 | Fedora 43 | Wireshark
 **Tool:** Wireshark
 
 ---
