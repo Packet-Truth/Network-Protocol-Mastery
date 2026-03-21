@@ -1,7 +1,7 @@
 # Lab Report: TCP Handshake & Latency Analysis
 
 **Date:** Feb 03, 2026
-**Lab :** Asus G14 (Arch Linux)
+**Lab:** GNS3 lab / Wireshark capture
 **Tool:** Wireshark
 
 ---
